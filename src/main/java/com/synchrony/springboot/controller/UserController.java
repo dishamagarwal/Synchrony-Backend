@@ -1,6 +1,5 @@
-package com.synchrony.springboot;
+package com.synchrony.springboot.controller;
 
-// import com.synchrony.springboot.model.Image;
 import com.synchrony.springboot.model.User;
 import com.synchrony.springboot.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
