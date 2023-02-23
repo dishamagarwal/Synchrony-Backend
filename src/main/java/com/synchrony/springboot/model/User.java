@@ -29,13 +29,17 @@ public class User {
 
     }
 
-    public User(Integer id, String firstName, String lastName, String phone, String username, String password) {
-        this.id = id;
+    public User(String firstName, String lastName, String phone, String username, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.username = username;
         this.password = password;
         this.phone = phone;
+    }
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
     @Override
