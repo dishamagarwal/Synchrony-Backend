@@ -1,34 +1,34 @@
 package com.synchrony.springboot.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name = "USER")
+@Table(name = "TBL_USERS")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "firstName")
+    @Column(name = "firstName", nullable=true, length=45)
     String firstName;
 
-    @Column(name = "lastName")
+    @Column(name = "lastName", nullable=true, length=45)
     String lastName;
 
-    @Column(name = "phone")
+    @Column(name = "phone", nullable=true, length=10)
     String phone;
     
-    @Column(name = "username")
+    @Column(name="username", nullable=false, length=45)
     String username;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable=false, length=45)
     String password;
 
     public User() {
 
     }
-
+    
     public User(String firstName, String lastName, String phone, String username, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
