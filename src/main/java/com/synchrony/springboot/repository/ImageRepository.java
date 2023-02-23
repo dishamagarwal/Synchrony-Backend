@@ -2,9 +2,9 @@ package com.synchrony.springboot.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import com.synchrony.springboot.model.User;
+import com.synchrony.springboot.model.Image;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Integer> {
-    // String createUser(User user);
+public interface ImageRepository extends JpaRepository<Image, Integer>  {
+
 }
