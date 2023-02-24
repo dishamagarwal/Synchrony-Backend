@@ -19,6 +19,10 @@ public class Image {
     public Image() {
     }
 
+    public Image(String url) {
+        this.url = url;
+    }
+    
     public Image(String url, User user) {
         this.url = url;
         this.user = user;
