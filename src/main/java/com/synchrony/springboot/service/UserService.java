@@ -1,18 +1,13 @@
 package com.synchrony.springboot.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import com.synchrony.springboot.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import com.synchrony.springboot.repository.UserRepository;
-import ch.qos.logback.core.subst.Token;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,30 +18,29 @@ public class UserService {
 
     // @Autowired
     // private PasswordEncoder passwordEncoder;
-
-    private final String API_KEY = "YOUR_API_KEY";
-    private final String REGISTER_ENDPOINT = "https://api.imgur.com/3/account";
     
     
-    public boolean authenticate(String username, String password) {
-        List<User> users = getAllUsers().stream().filter(user -> username
-        .equals(user.getName())).collect(Collectors.toList());
-        User user = users.get(0);
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(API_KEY);
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("username", user.getUsername());
-        body.add("password", user.getPassword());
-        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
-        ResponseEntity<Token> responseEntity = restTemplate.exchange(REGISTER_ENDPOINT, HttpMethod.POST, requestEntity, Token.class);
-        if(responseEntity.getStatusCode() == HttpStatus.OK) {
-            //Registration successful, save account information from the response
-            return true;
-        } else {
-            //Registration failed
+    public boolean authenticate(String username, String password) throws Exception {
+        List<User> temp = getAllUsers();
+        List<User> users = temp.stream().filter(user -> username
+        .equals(user.getUsername())).collect(Collectors.toList());
+        try {
+            if (users.size() <= 0) {
+                throw new Exception("incorrect username");
+            }
+            User user = users.get(0);
+            if (decodePassword(user.getPassword()).equals(decodePassword(password))) {
+            } else {
+                throw new Exception("incorrect password");
+            }
+            // generating session id
+            String session = UUID.randomUUID().toString();
+            user.setSessionID(session);
+            user.setSessionExpiary();
+        } catch (Exception e) {
             return false;
         }
+        return true;
     }
 
     public boolean register(User user) {

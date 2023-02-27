@@ -26,6 +26,12 @@ public class User {
     @Column(name = "password", nullable=false, length=45)
     String password;
 
+    @Column(name = "sessionID", nullable=true, length=50)
+    String sessionID;
+
+    @Column(name = "sessionExpiary", nullable=true, length=20)
+    long sessionExpiary;
+
     public User() {
 
     }
@@ -99,5 +105,22 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSessionID() {
+        return sessionID;
+    }
+
+    public void setSessionID(String sessionID) {
+        this.sessionID = sessionID;
+    }
+
+    public long getSessionExpiary() {
+        return sessionExpiary;
+    }
+
+    public void setSessionExpiary() {
+        // expires in 10 mins
+        this.sessionExpiary = System.currentTimeMillis() + 600000;
     }
 }

@@ -17,7 +17,8 @@ public class UserController {
     private UserService userService;
     
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) throws Exception {
+        // TODO: authenticate username password using oauth
         if(userService.authenticate(username, password)) {
             return ResponseEntity.ok().build();
         } else {
