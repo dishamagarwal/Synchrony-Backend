@@ -2,13 +2,12 @@ package com.synchrony.springboot.controller;
 
 import com.synchrony.springboot.model.User;
 import com.synchrony.springboot.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/v1")
@@ -18,28 +17,44 @@ public class UserController {
     private UserService userService;
     
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        if(userService.authenticate(user)) {
+    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
+        if(userService.authenticate(username, password)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 
-    @GetMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
-        List<User> tempUser = getAllUsers().stream().filter(cur_user->cur_user.getUsername()
-        .equals(user.getUsername())).collect(Collectors.toList());
-        if (tempUser.size() <= 0) {
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestParam @Valid String username, @RequestParam @Valid String password, 
+    @RequestParam(required=false) String phone, @RequestParam(required=false) String firstname, 
+    @RequestParam(required=false) String lastname) {
+        // encrypt password
+        User user = new User(username, userService.encodePassword(password));
+        if (!userService.userAlreadyExists(username, phone)) {
+            if (phone!=null && phone!="") {
+                user.setPhone(phone);
+            }
+            if (firstname!=null && firstname!="") {
+                user.setFirstName(firstname);
+            }
+            if (lastname!=null && lastname!="") {
+                user.setLastName(lastname);
+            }
             try {
-                userService.register(user);
-                userService.saveOrUpdateUser(user);
-                return ResponseEntity.ok().build();
+                if (userService.register(user)) {
+                    return ResponseEntity.ok().build();
+                    // TODO: redirect to homepage with upload/get/delete image options
+                } else {
+                    throw new Exception("username or phone# already exists");
+                }
             } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            // TIP: can be done to update user details
+            // userService.saveOrUpdateUser(user);
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 

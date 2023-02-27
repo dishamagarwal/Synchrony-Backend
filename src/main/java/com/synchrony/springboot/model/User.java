@@ -1,6 +1,7 @@
 package com.synchrony.springboot.model;
 
 import jakarta.persistence.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Table(name = "TBL_USERS")
@@ -16,10 +17,10 @@ public class User {
     @Column(name = "lastName", nullable=true, length=45)
     String lastName;
 
-    @Column(name = "phone", nullable=true, length=10)
+    @Column(name = "phone", nullable=true, length=10, unique=true)
     String phone;
     
-    @Column(name="username", nullable=false, length=45)
+    @Column(name="username", nullable=false, length=45, unique=true)
     String username;
 
     @Column(name = "password", nullable=false, length=45)
@@ -50,10 +51,6 @@ public class User {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getName() {

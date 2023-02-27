@@ -25,10 +25,9 @@ public class ImageController {
     private ImageService imageService;
     
     @PostMapping("/upload")
-    public ResponseEntity<Image> uploadImage(@RequestHeader("Authorization") String authHeader, 
-    @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Image> uploadImage(@RequestHeader("Authorization") String authHeader) {
         User user = extractUserFromHeader(authHeader);
-        Image image = imageService.uploadImage(user, file);
+        Image image = imageService.uploadImage(user);
         return ResponseEntity.ok(image);
     }
     

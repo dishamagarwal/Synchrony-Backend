@@ -1,9 +1,7 @@
 package com.synchrony.springboot.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import com.synchrony.springboot.model.Image;
 import com.synchrony.springboot.model.User;
 import com.synchrony.springboot.repository.ImageRepository;
@@ -12,31 +10,30 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
 import com.synchrony.springboot.response.ImgurApiResponse;
-import java.io.File;
 
 @Service
 public class ImageService {
     @Autowired
     ImageRepository imageRepository;
-    private final String LOGIN_ENDPOINT = "https://api.imgur.com/oauth2/token";
-    private final String REGISTER_ENDPOINT = "https://api.imgur.com/3/account";
-    private final String REFRESH_TOKEN = "b02b1a8164fd73cbe0c1189f236bd03794922b6e";
-    private final String CLIENT_ID = "0db31a4457dcdc0";
-    private final String CLIENT_SECRET = "40c3d3c9e7051cc379f4fbf77c7aedec096c0f60";
     
-    public Image uploadImage(User user, MultipartFile file) {
-        //TODO: Code to upload image to Imgur API
+    private final String BEARER_TOKEN = "b02b1a8164fd73cbe0c1189f236bd03794922b6e";
+    private final String CLIENT_ID = "0db31a4457dcdc0";
+    private final String url = "https://thumbs.dreamstime.com/b/set-elements-fir-tree-branches-christmas-isolated-white-transparent-background-add-png-file--happy-happy-new-year-135296751.jpg";
+    private final String GRANT_TYPE = "";
+    
+    public Image uploadImage(User user) {
+        // TODO: Code to upload image to Imgur API
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(REFRESH_TOKEN);
+        headers.setBearerAuth(BEARER_TOKEN);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        FileSystemResource fileResource = new FileSystemResource(new File("PATH_TO_IMAGE_FILE"));
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("image", fileResource);
+        body.add("image", url);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        ResponseEntity<ImgurApiResponse> responseEntity = restTemplate.exchange("https://api.imgur.com/3/image", HttpMethod.POST, requestEntity, ImgurApiResponse.class);
+        ResponseEntity<ImgurApiResponse> responseEntity = restTemplate.exchange(
+            "https://api.imgur.com/3/image", HttpMethod.POST, requestEntity, ImgurApiResponse.class);
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             try {
