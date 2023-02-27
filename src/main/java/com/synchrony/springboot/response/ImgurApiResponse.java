@@ -7,6 +7,9 @@ public class ImgurApiResponse {
     private int status;
     private ImgurData data;
     
+    public ImgurApiResponse() {
+    }
+    
     public ImgurApiResponse(boolean success, int status, ImgurData data) {
         this.success = success;
         this.status = status;

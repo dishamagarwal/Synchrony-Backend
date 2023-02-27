@@ -23,7 +23,7 @@ public class ImageController {
     private ImageService imageService;
     
     @PostMapping("/upload")
-    public ResponseEntity<Image> uploadImage(@RequestHeader("Authorization") String session) {
+    public ResponseEntity<Image> uploadImage(@RequestHeader String session) throws Exception {
         // User user = extractUserFromHeader(session);
         User user = new User();
         Image image = imageService.uploadImage(user);
@@ -36,7 +36,7 @@ public class ImageController {
         return ResponseEntity.ok(image);
     }
     
-    @DeleteMapping("/{id}")
+    @DeleteMapping("delete/{id}")
     public ResponseEntity<Void> deleteImage(@RequestHeader("Authorization") String authHeader, @PathVariable("id") String id) {
         User user = extractUserFromHeader(authHeader);
         if(imageService.deleteImage(user, id)) {

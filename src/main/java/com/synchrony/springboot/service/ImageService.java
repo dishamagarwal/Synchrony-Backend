@@ -1,6 +1,7 @@
 package com.synchrony.springboot.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import com.synchrony.springboot.model.Image;
 import com.synchrony.springboot.model.User;
@@ -20,37 +21,37 @@ public class ImageService {
     // private final String CLIENT_ID = "0db31a4457dcdc0";
     // private final String CLIENT_ID_SECRET = "0db31a4457dcdc0";
     private final String url = "https://thumbs.dreamstime.com/b/set-elements-fir-tree-branches-christmas-isolated-white-transparent-background-add-png-file--happy-happy-new-year-135296751.jpg";
-    // private final String GRANT_TYPE = "";
     
-    public Image uploadImage(User user) {
-        // TODO: Code to upload image to Imgur API
+    public Image uploadImage(User user) throws Exception {
+        // check if user exists
+        // if image exists in the user
+        // if session is not expired
+        // add the image to the user
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(BEARER_TOKEN);
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.set("Authorization", "Bearer " + BEARER_TOKEN);
+        headers.set("Cookie", "IMGURSESSION=8e3ccad0586ddb1bbe23ae652e2d076c; _nc=1");
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        // new UrlResource(url)
         body.add("image", url);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        ResponseEntity<ImgurApiResponse> responseEntity = restTemplate.exchange(
-            "https://api.imgur.com/3/image", HttpMethod.POST, requestEntity, ImgurApiResponse.class);
 
-        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            try {
-                //Image was uploaded successfully, TODO: do something with the response
-                ImgurApiResponse imgurApiResponse = responseEntity.getBody();
-                String imageUrl = imgurApiResponse.getData().getLink();
-                return new Image(imageUrl, user);
-            } catch (Exception e) {
-                throw new Error(e);
-            }
-            //TODO: Do something with the image URL
-        } else {
-            //Image upload failed
-            //TODO: Handle the error
-            throw new Error();
+        ResponseEntity<ImgurApiResponse> response = restTemplate.postForEntity(
+            "https://api.imgur.com/3/image", 
+            requestEntity, 
+            ImgurApiResponse.class);
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new Exception("api request failed");
         }
+        ImgurApiResponse imgurApiResponse = response.getBody();
+        if (imgurApiResponse == null){
+            throw new Exception("no image found");
+        } 
+        String imageUrl = imgurApiResponse.getData().getLink();
+        return new Image(imageUrl, user);
     }
     
     public Image getImage(String id) {
