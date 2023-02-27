@@ -26,35 +26,30 @@ public class UserService {
     // private PasswordEncoder passwordEncoder;
     
     
-    public boolean authenticate(String username, String password) throws Exception {
+    public String authenticate(String username, String password) throws Exception {
         List<User> temp = getAllUsers();
         List<User> users = temp.stream().filter(user -> username
         .equals(user.getUsername())).collect(Collectors.toList());
-        try {
-            // TODO: check if there is a non-expired session for the user
-            // if there is then auto log in the user else:
-            if (users.size() <= 0) {
-                throw new Exception("incorrect username");
-            }
-            User user = users.get(0);
-            if (decodePassword(user.getPassword()).equals(decodePassword(password))) {
-            } else {
-                throw new Exception("incorrect password");
-            }
-            
-            // creating new session
-            Session session = new Session(user);
-            sessionRepository.save(session);
-            // checking if the session is expired
-            if (session.getExpirationDate().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
-                throw new Exception("session key expired");
-                // TODO: logout the user
-            }
-            // TODO: auto login the user if not expired
-        } catch (Exception e) {
-            return false;
+        // TODO: check if there is a non-expired session for the user
+        // if there is then auto log in the user else:
+        if (users.size() <= 0) {
+            throw new Exception("incorrect username");
         }
-        return true;
+        User user = users.get(0);
+        if (!decodePassword(user.getPassword()).equals(decodePassword(password))) {
+            throw new Exception("incorrect password");
+        }
+        
+        // creating new session
+        Session session = new Session(user);
+        sessionRepository.save(session);
+        // checking if the session is expired
+        if (session.getExpirationDate().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
+            throw new Exception("session key expired");
+            // TODO: logout the user
+        }
+        // TODO: auto login the user if not expired
+        return session.getToken();
     }
 
     public boolean register(User user) {

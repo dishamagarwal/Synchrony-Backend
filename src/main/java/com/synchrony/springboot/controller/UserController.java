@@ -4,7 +4,9 @@ import com.synchrony.springboot.model.User;
 import com.synchrony.springboot.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -19,10 +21,17 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) throws Exception {
         // TODO: authenticate username password using oauth
-        if(userService.authenticate(username, password)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        try {
+            String token = userService.authenticate(username, password);
+            if(token != "") {
+                final HttpHeaders httpHeaders = new HttpHeaders(); httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                return new ResponseEntity < String > ("{\"session_token\": \""+token+"\"}", httpHeaders, HttpStatus.OK);
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+        } catch (Exception e) {
+            final HttpHeaders httpHeaders = new HttpHeaders(); httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            return new ResponseEntity < String > ("{\"Error\": \""+e.getMessage()+"\"}", httpHeaders, HttpStatus.BAD_REQUEST);
         }
     }
 
