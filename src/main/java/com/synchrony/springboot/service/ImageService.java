@@ -17,9 +17,10 @@ public class ImageService {
     ImageRepository imageRepository;
     
     private final String BEARER_TOKEN = "b02b1a8164fd73cbe0c1189f236bd03794922b6e";
-    private final String CLIENT_ID = "0db31a4457dcdc0";
+    // private final String CLIENT_ID = "0db31a4457dcdc0";
+    // private final String CLIENT_ID_SECRET = "0db31a4457dcdc0";
     private final String url = "https://thumbs.dreamstime.com/b/set-elements-fir-tree-branches-christmas-isolated-white-transparent-background-add-png-file--happy-happy-new-year-135296751.jpg";
-    private final String GRANT_TYPE = "";
+    // private final String GRANT_TYPE = "";
     
     public Image uploadImage(User user) {
         // TODO: Code to upload image to Imgur API

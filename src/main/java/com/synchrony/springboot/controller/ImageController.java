@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import com.synchrony.springboot.model.Image;
 import com.synchrony.springboot.model.User;
 import com.synchrony.springboot.service.ImageService;
@@ -25,8 +23,9 @@ public class ImageController {
     private ImageService imageService;
     
     @PostMapping("/upload")
-    public ResponseEntity<Image> uploadImage(@RequestHeader("Authorization") String authHeader) {
-        User user = extractUserFromHeader(authHeader);
+    public ResponseEntity<Image> uploadImage(@RequestHeader("Authorization") String session) {
+        // User user = extractUserFromHeader(session);
+        User user = new User();
         Image image = imageService.uploadImage(user);
         return ResponseEntity.ok(image);
     }

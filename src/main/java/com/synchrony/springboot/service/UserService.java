@@ -1,13 +1,16 @@
 package com.synchrony.springboot.service;
 
 import org.springframework.stereotype.Service;
+import com.synchrony.springboot.model.Session;
 import com.synchrony.springboot.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.synchrony.springboot.repository.SessionRepository;
 import com.synchrony.springboot.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,6 +18,9 @@ public class UserService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    SessionRepository sessionRepository;
 
     // @Autowired
     // private PasswordEncoder passwordEncoder;
@@ -25,6 +31,8 @@ public class UserService {
         List<User> users = temp.stream().filter(user -> username
         .equals(user.getUsername())).collect(Collectors.toList());
         try {
+            // TODO: check if there is a non-expired session for the user
+            // if there is then auto log in the user else:
             if (users.size() <= 0) {
                 throw new Exception("incorrect username");
             }
@@ -33,10 +41,16 @@ public class UserService {
             } else {
                 throw new Exception("incorrect password");
             }
-            // generating session id
-            String session = UUID.randomUUID().toString();
-            user.setSessionID(session);
-            user.setSessionExpiary();
+            
+            // creating new session
+            Session session = new Session(user);
+            sessionRepository.save(session);
+            // checking if the session is expired
+            if (session.getExpirationDate().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
+                throw new Exception("session key expired");
+                // TODO: logout the user
+            }
+            // TODO: auto login the user if not expired
         } catch (Exception e) {
             return false;
         }
