@@ -26,8 +26,12 @@ public class SessionService {
         return sessions;
     }
 
-    public Session getSessionById(int id) {
-        return sessionRepository.findById(id).get();
+    public Session getSessionById(int id) throws Exception {
+        Session session = sessionRepository.findById(id).get();
+        if (sessionExpired(session)) {
+            throw new Exception("session token expired");
+        }
+        return session;
     }
 
     // using CRUD functions to create and delete sessions
@@ -41,17 +45,18 @@ public class SessionService {
 
     public boolean sessionExpired(Session session) {
         return session.getExpirationDate().isBefore(LocalDateTime.now(ZoneOffset.UTC));
+        // TODO: logout the user
     }
 
-    public ResponseEntity<User> getUserFromToken(String token) {
+    public ResponseEntity<User> getUserFromToken(String token) throws Exception {
         List<Session> cur = getAllSessions().stream().filter(cur_session->cur_session.getToken()
         .equals(token)).collect(Collectors.toList());
         if (cur.size()<=0) {
-            throw new Error("no such session found");
+            throw new Exception("no such session found");
         }
         Session session = cur.get(0);
         if (sessionExpired(session)) {
-            throw new Error("token has expired");
+            throw new Exception("token has expired");
         }
         return ResponseEntity.ok(session.getUser());
     }

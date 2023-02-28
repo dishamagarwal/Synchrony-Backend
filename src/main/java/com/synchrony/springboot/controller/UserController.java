@@ -20,7 +20,6 @@ public class UserController {
     
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) throws Exception {
-        // TODO: authenticate username password using oauth
         try {
             String token = userService.authenticate(username, password);
             if(token != "" || token != null) {
@@ -41,8 +40,16 @@ public class UserController {
     @RequestParam(required=false) String lastname) {
         // encrypt password
         User user = new User(username, userService.encodePassword(password));
-        if (!userService.userAlreadyExists(username, phone)) {
+        try {
+            if (userService.userAlreadyExists(username, phone)) {
+                // TIP: can be done to update user details
+                // userService.saveOrUpdateUser(user);
+                throw new Exception("username or phone number already exists");
+            }
             if (phone!=null && phone!="") {
+                if (phone.length()!=10) {
+                    throw new Exception("phone number is invalid");
+                }
                 user.setPhone(phone);
             }
             if (firstname!=null && firstname!="") {
@@ -51,23 +58,14 @@ public class UserController {
             if (lastname!=null && lastname!="") {
                 user.setLastName(lastname);
             }
-            try {
-                String token = userService.register(user);
-                if (token != "" || token != null) {
-                    final HttpHeaders httpHeaders = new HttpHeaders(); httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                    return new ResponseEntity < String > ("{\"session_token\": \""+token+"\"}", httpHeaders, HttpStatus.OK);
-                    // TODO: redirect to homepage with upload/get/delete image options
-                } else {
-                    throw new Exception("username or phone# already exists");
-                }
-            } catch (Exception e) {
-                final HttpHeaders httpHeaders = new HttpHeaders(); httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                return new ResponseEntity < String > ("{\"Error\": \""+e.getMessage()+"\"}", httpHeaders, HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            // TIP: can be done to update user details
-            // userService.saveOrUpdateUser(user);
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+
+            String token = userService.register(user);
+            final HttpHeaders httpHeaders = new HttpHeaders(); 
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            return new ResponseEntity < String > ("{\"session_token\": \""+token+"\"}", httpHeaders, HttpStatus.OK);
+        } catch (Exception e) {
+            final HttpHeaders httpHeaders = new HttpHeaders(); httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            return new ResponseEntity < String > ("{\"Error\": \""+e.getMessage()+"\"}", httpHeaders, HttpStatus.BAD_REQUEST);
         }
     }
 

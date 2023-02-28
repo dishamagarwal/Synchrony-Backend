@@ -41,7 +41,7 @@ public class ImageService {
         .collect(Collectors.toList());
 
         if (images.size() > 0) {
-            throw new Error("image is already present");
+            throw new Exception("image is already present");
         }
 
         // making the API call to imgur
@@ -77,13 +77,13 @@ public class ImageService {
     
     public Image getImage(String id, User user) throws Exception {
         if (id==null || id==" ") {
-            throw new Error("empty id");
+            throw new Exception("empty id");
         }
         List<Image> images = getImagesForUser(user).stream()
         .filter(image->image.getId().equals(id))
         .collect(Collectors.toList());
         if (images.size() <= 0) { //TODO: check if image is present using id
-            throw new Error("image is not present");
+            throw new Exception("image is not present");
         }
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -107,13 +107,13 @@ public class ImageService {
         return new Image(imgurApiResponse.getData().getId(), imgurApiResponse.getData().getLink(), user);
     }
     
-    public ResponseEntity<String> deleteImage(User user, String id) {
+    public ResponseEntity<String> deleteImage(User user, String id) throws Exception {
         // check if the image is in the images for the user
         List<Image> images = getImagesForUser(user).stream()
         .filter(image->image.getId().equals(id))
         .collect(Collectors.toList());
         if (images.size() <= 0) {
-            throw new Error("image is not present");
+            throw new Exception("image is not present");
         }
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -135,7 +135,7 @@ public class ImageService {
             delete(images.get(0));
             return responseEntity;
         } else {
-            throw new Error("could not delete image");
+            throw new Exception("could not delete image");
         }
     }
 

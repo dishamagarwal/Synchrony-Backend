@@ -40,13 +40,6 @@ public class UserService {
         // creating new session
         Session session = new Session(user);
         sessionService.saveOrUpdateSession(session);
-        // TODO: do it in the session service 
-        // and to becalled everytime someone calls imgur api/performs an action
-        if (sessionService.sessionExpired(session)) {
-            throw new Exception("session key expired");
-            // TODO: logout the user
-        }
-        // TODO: auto login the user if not expired
         return session.getToken();
     }
 

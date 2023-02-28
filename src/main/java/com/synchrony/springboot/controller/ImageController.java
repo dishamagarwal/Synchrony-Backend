@@ -35,7 +35,7 @@ public class ImageController {
     }
     
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<String> deleteImage(@RequestHeader String session, @PathVariable("id") String id) {
+    public ResponseEntity<String> deleteImage(@RequestHeader String session, @PathVariable("id") String id) throws Exception {
         User user = sessionService.getUserFromToken(session).getBody();
         return imageService.deleteImage(user, id);
     }
