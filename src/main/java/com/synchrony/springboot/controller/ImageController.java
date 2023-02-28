@@ -35,12 +35,8 @@ public class ImageController {
     }
     
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<Void> deleteImage(@RequestHeader String session, @PathVariable("id") String id) {
+    public ResponseEntity<String> deleteImage(@RequestHeader String session, @PathVariable("id") String id) {
         User user = sessionService.getUserFromToken(session).getBody();
-        if(imageService.deleteImage(user, id)) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+        return imageService.deleteImage(user, id);
     }
 }

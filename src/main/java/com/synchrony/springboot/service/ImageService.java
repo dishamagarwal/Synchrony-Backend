@@ -82,38 +82,33 @@ public class ImageService {
         List<Image> images = getImagesForUser(user).stream()
         .filter(image->image.getId().equals(id))
         .collect(Collectors.toList());
-        if (images.size() <= 0) {
+        if (images.size() <= 0) { //TODO: check if image is present using id
             throw new Error("image is not present");
         }
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer b02b1a8164fd73cbe0c1189f236bd03794922b6e");
-        headers.set("Cookie", "IMGURSESSION=8195e3cfc0d8763ec2a1f194e691326d; _nc=1");
 
-        // HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
-        HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
-
-        ResponseEntity<String> response = restTemplate.getForEntity(
-            "https://api.imgur.com/3/image/"+id, 
-            String.class,
-            requestEntity);
+        HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+        ResponseEntity<ImgurApiResponse> response = restTemplate.exchange(
+            "https://api.imgur.com/3/image/8MkptkJ",
+            HttpMethod.GET,
+            requestEntity,
+            ImgurApiResponse.class
+        );
 
         if (response.getStatusCode() != HttpStatus.OK) {
-            //Image retrieval failed
-            //Handle the error
             throw new Exception("api request failed");
         }
-        // ImgurApiResponse imgurApiResponse = response.getBody();
-        if (response.getBody() == null){
+        ImgurApiResponse imgurApiResponse = response.getBody();
+        if (imgurApiResponse == null){
             throw new Exception("no image found");
         } 
-        //Image was retrieved successfully
-        // return new Image(imgurApiResponse.getData().getId(), imgurApiResponse.getData().getLink(), user);
-        return null;
+        return new Image(imgurApiResponse.getData().getId(), imgurApiResponse.getData().getLink(), user);
     }
     
-    public boolean deleteImage(User user, String id) {
-        // check if the image is in the images
+    public ResponseEntity<String> deleteImage(User user, String id) {
+        // check if the image is in the images for the user
         List<Image> images = getImagesForUser(user).stream()
         .filter(image->image.getId().equals(id))
         .collect(Collectors.toList());
@@ -138,7 +133,7 @@ public class ImageService {
             // Image was deleted successfully
             // delete the image from the database
             delete(images.get(0));
-            return true;
+            return responseEntity;
         } else {
             throw new Error("could not delete image");
         }
