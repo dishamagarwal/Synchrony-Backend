@@ -4,16 +4,11 @@ import java.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.synchrony.springboot.model.Image;
 import com.synchrony.springboot.model.User;
 import com.synchrony.springboot.service.ImageService;
+import com.synchrony.springboot.service.SessionService;
 
 @RestController
 @RequestMapping("imgur/")
@@ -21,12 +16,16 @@ public class ImageController {
     
     @Autowired
     private ImageService imageService;
+    @Autowired
+    private SessionService sessionService;
+
+    // private final String url = "https://thumbs.dreamstime.com/b/set-elements-fir-tree-branches-christmas-isolated-white-transparent-background-add-png-file--happy-happy-new-year-135296751.jpg";
     
     @PostMapping("/upload")
-    public ResponseEntity<Image> uploadImage(@RequestHeader String session) throws Exception {
-        // User user = extractUserFromHeader(session);
-        User user = new User();
-        Image image = imageService.uploadImage(user);
+    public ResponseEntity<Image> uploadImage(@RequestHeader String session, @RequestParam String url) throws Exception {
+        // TODO: thread-safe cache for token
+        User user = sessionService.getUserFromToken(session).getBody();
+        Image image = imageService.uploadImage(user, url);
         return ResponseEntity.ok(image);
     }
     

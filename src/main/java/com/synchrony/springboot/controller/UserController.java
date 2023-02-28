@@ -23,7 +23,7 @@ public class UserController {
         // TODO: authenticate username password using oauth
         try {
             String token = userService.authenticate(username, password);
-            if(token != "") {
+            if(token != "" || token != null) {
                 final HttpHeaders httpHeaders = new HttpHeaders(); httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                 return new ResponseEntity < String > ("{\"session_token\": \""+token+"\"}", httpHeaders, HttpStatus.OK);
             } else {
@@ -52,14 +52,17 @@ public class UserController {
                 user.setLastName(lastname);
             }
             try {
-                if (userService.register(user)) {
-                    return ResponseEntity.ok().build();
+                String token = userService.register(user);
+                if (token != "" || token != null) {
+                    final HttpHeaders httpHeaders = new HttpHeaders(); httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                    return new ResponseEntity < String > ("{\"session_token\": \""+token+"\"}", httpHeaders, HttpStatus.OK);
                     // TODO: redirect to homepage with upload/get/delete image options
                 } else {
                     throw new Exception("username or phone# already exists");
                 }
             } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                final HttpHeaders httpHeaders = new HttpHeaders(); httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                return new ResponseEntity < String > ("{\"Error\": \""+e.getMessage()+"\"}", httpHeaders, HttpStatus.BAD_REQUEST);
             }
         } else {
             // TIP: can be done to update user details

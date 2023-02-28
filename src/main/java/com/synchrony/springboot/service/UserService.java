@@ -4,10 +4,7 @@ import org.springframework.stereotype.Service;
 import com.synchrony.springboot.model.Session;
 import com.synchrony.springboot.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.synchrony.springboot.repository.SessionRepository;
 import com.synchrony.springboot.repository.UserRepository;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +17,7 @@ public class UserService {
     UserRepository userRepository;
 
     @Autowired
-    SessionRepository sessionRepository;
+    SessionService sessionService;
 
     // @Autowired
     // private PasswordEncoder passwordEncoder;
@@ -42,9 +39,10 @@ public class UserService {
         
         // creating new session
         Session session = new Session(user);
-        sessionRepository.save(session);
-        // checking if the session is expired
-        if (session.getExpirationDate().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
+        sessionService.saveOrUpdateSession(session);
+        // TODO: do it in the session service 
+        // and to becalled everytime someone calls imgur api/performs an action
+        if (sessionService.sessionExpired(session)) {
             throw new Exception("session key expired");
             // TODO: logout the user
         }
@@ -52,13 +50,17 @@ public class UserService {
         return session.getToken();
     }
 
-    public boolean register(User user) {
+    public String register(User user) throws Exception {
+        
+
+        Session session = new Session(user);
         try {
             userRepository.save(user);
+            sessionService.saveOrUpdateSession(session);
         } catch(Exception e) {
-            return false;
+            throw new Exception("unable to save user");
         }
-        return true;
+        return session.getToken();
     }
     
     public List<User> getAllUsers() {
@@ -103,7 +105,6 @@ public class UserService {
             tempUser2 = getAllUsers().stream().filter(cur_user->cur_user.getPhone()
             .equals(phone)).collect(Collectors.toList());
         }
-
         return (tempUser.size() > 0 || tempUser2.size() > 0);
     }
 }

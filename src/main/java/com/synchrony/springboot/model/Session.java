@@ -21,7 +21,7 @@ public class Session {
 
     @PrePersist
     public void setExpirationDate() {
-        this.expirationDate = LocalDateTime.now(ZoneOffset.UTC).plusMinutes(60);
+        this.expirationDate = LocalDateTime.now(ZoneOffset.UTC).plusDays(60);
     }
     
     @ManyToOne
@@ -30,11 +30,13 @@ public class Session {
 
     public Session() {
         this.token = UUID.randomUUID().toString();
+        this.expirationDate = LocalDateTime.now(ZoneOffset.UTC).plusDays(60);
     }
     
     public Session(User user) {
         this.user = user;
         this.token = UUID.randomUUID().toString();
+        this.expirationDate = LocalDateTime.now(ZoneOffset.UTC).plusDays(60);
     }
 
     public User getUser() {
