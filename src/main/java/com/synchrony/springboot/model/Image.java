@@ -6,8 +6,7 @@ import jakarta.persistence.*;
 @Table(name = "images")
 public class Image {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
     
     @Column(name = "url")
     private String url;
@@ -19,20 +18,17 @@ public class Image {
     public Image() {
     }
 
-    public Image(String url) {
-        this.url = url;
-    }
-    
-    public Image(String url, User user) {
+    public Image(String id, String url, User user) {
+        this.id = id;
         this.url = url;
         this.user = user;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

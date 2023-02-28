@@ -24,7 +24,7 @@ public class UserService {
     
     
     public String authenticate(String username, String password) throws Exception {
-        List<User> temp = getAllUsers();
+        List<User> temp = getAllUsers(); 
         List<User> users = temp.stream().filter(user -> username
         .equals(user.getUsername())).collect(Collectors.toList());
         // TODO: check if there is a non-expired session for the user
@@ -52,7 +52,7 @@ public class UserService {
 
     public String register(User user) throws Exception {
         
-
+        // TODO: make sure the username is not case sensitive
         Session session = new Session(user);
         try {
             userRepository.save(user);

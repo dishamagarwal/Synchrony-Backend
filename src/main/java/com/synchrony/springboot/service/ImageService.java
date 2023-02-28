@@ -3,7 +3,6 @@ package com.synchrony.springboot.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.synchrony.springboot.model.*;
@@ -48,7 +47,8 @@ public class ImageService {
         // making the API call to imgur
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + BEARER_TOKEN);
+        // headers.set("Authorization", "Bearer " + BEARER_TOKEN);
+        headers.setBearerAuth(BEARER_TOKEN);
         headers.set("Cookie", "IMGURSESSION=8e3ccad0586ddb1bbe23ae652e2d076c; _nc=1");
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
@@ -69,53 +69,78 @@ public class ImageService {
         if (imgurApiResponse == null){
             throw new Exception("no image found");
         } 
-        String imageUrl = imgurApiResponse.getData().getLink();
         // add the image to the user
-        Image image = new Image(imageUrl, user);
+        Image image = new Image(imgurApiResponse.getData().getId(), imgurApiResponse.getData().getLink(), user);
         saveOrUpdateImage(image);
         return image;
     }
     
-    public Image getImage(String id) {
-        //TODO: Code to get image from Imgur API by ID
+    public Image getImage(String id, User user) throws Exception {
+        if (id==null || id==" ") {
+            throw new Error("empty id");
+        }
+        List<Image> images = getImagesForUser(user).stream()
+        .filter(image->image.getId().equals(id))
+        .collect(Collectors.toList());
+        if (images.size() <= 0) {
+            throw new Error("image is not present");
+        }
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth("YOUR_ACCESS_TOKEN");
+        headers.set("Authorization", "Bearer b02b1a8164fd73cbe0c1189f236bd03794922b6e");
+        headers.set("Cookie", "IMGURSESSION=8195e3cfc0d8763ec2a1f194e691326d; _nc=1");
 
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+        // HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(headers);
+        HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
 
-        ResponseEntity<ImgurApiResponse> responseEntity = restTemplate.exchange("https://api.imgur.com/3/image/IMAGE_ID", HttpMethod.GET, entity, ImgurApiResponse.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(
+            "https://api.imgur.com/3/image/"+id, 
+            String.class,
+            requestEntity);
 
-        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            //Image was retrieved successfully, do something with the response
-            ImgurApiResponse imgurApiResponse = responseEntity.getBody();
-            String imageUrl = imgurApiResponse.getData().getLink();
-            //Do something with the image URL
-            return new Image(imageUrl);
-        } else {
+        if (response.getStatusCode() != HttpStatus.OK) {
             //Image retrieval failed
             //Handle the error
-            throw new Error();
+            throw new Exception("api request failed");
         }
+        // ImgurApiResponse imgurApiResponse = response.getBody();
+        if (response.getBody() == null){
+            throw new Exception("no image found");
+        } 
+        //Image was retrieved successfully
+        // return new Image(imgurApiResponse.getData().getId(), imgurApiResponse.getData().getLink(), user);
+        return null;
     }
     
     public boolean deleteImage(User user, String id) {
-        //TODO: Code to delete image from Imgur API by ID
+        // check if the image is in the images
+        List<Image> images = getImagesForUser(user).stream()
+        .filter(image->image.getId().equals(id))
+        .collect(Collectors.toList());
+        if (images.size() <= 0) {
+            throw new Error("image is not present");
+        }
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth("YOUR_ACCESS_TOKEN");
+        headers.setBearerAuth("b02b1a8164fd73cbe0c1189f236bd03794922b6e");
+        headers.set("Cookie", "IMGURSESSION=8195e3cfc0d8763ec2a1f194e691326d; _nc=1");
 
-        HttpEntity<?> entity = new HttpEntity<>(headers);
+        HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
 
-        ResponseEntity<ImgurApiResponse> responseEntity = restTemplate.exchange("https://api.imgur.com/3/image/IMAGE_ID", HttpMethod.DELETE, entity, ImgurApiResponse.class);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+            "https://api.imgur.com/3/image/"+id,
+            HttpMethod.DELETE,
+            requestEntity,
+            String.class
+        );
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            //Image was deleted successfully
+            // Image was deleted successfully
+            // delete the image from the database
+            delete(images.get(0));
             return true;
         } else {
-            //Image deletion failed
-            //Handle the error
-            return false;
+            throw new Error("could not delete image");
         }
     }
 
@@ -134,8 +159,12 @@ public class ImageService {
         imageRepository.save(image);
     }
 
-    public void deleteImageById (int id) {
+    public void deleteImageById(int id) {
         imageRepository.deleteById(id);
+    }
+
+    public void delete(Image image) {
+        imageRepository.delete(image);
     }
 
     public List<Image> getImagesForUser(User user) {
