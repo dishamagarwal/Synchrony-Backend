@@ -4,6 +4,9 @@ import org.springframework.stereotype.Service;
 import com.synchrony.springboot.model.Session;
 import com.synchrony.springboot.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.synchrony.springboot.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,11 +19,15 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
+    // public PasswordEncoder passwordEncoder() {
+    //     return new BCryptPasswordEncoder(11);
+    // }
+
     @Autowired
     SessionService sessionService;
 
-    // @Autowired
-    // private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     
     
     public String authenticate(String username, String password) throws Exception {
@@ -33,7 +40,8 @@ public class UserService {
             throw new Exception("incorrect username");
         }
         User user = users.get(0);
-        if (!decodePassword(user.getPassword()).equals(decodePassword(password))) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();  
+        if (!encoder.matches(password, user.getPassword())) {
             throw new Exception("incorrect password");
         }
         
@@ -76,9 +84,9 @@ public class UserService {
     }
 
     public String encodePassword(String password) {
-        // return passwordEncoder.encode(password);
+        return passwordEncoder.encode(password);
         // TODO: encode password by adding a @Bean to the config PasswordEncoder
-        return password;
+        // return password;
     }
 
     public String decodePassword(String password) {
