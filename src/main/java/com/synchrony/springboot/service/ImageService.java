@@ -30,7 +30,7 @@ public class ImageService {
     // private final String CLIENT_ID = "0db31a4457dcdc0";
     // private final String CLIENT_ID_SECRET = "0db31a4457dcdc0";
     
-    public Image uploadImage(User user, String url) throws Exception {
+    public ImgurApiResponse uploadImage(User user, String url) throws Exception {
         // check if user exists
         // if (userService.getUserById(user.getId()) == null ||  userService.getUserById(user.getId()) != user) {
         //     throw new Error("user does not exist or something went wrong"); // direct to login screen
@@ -49,7 +49,6 @@ public class ImageService {
         HttpHeaders headers = new HttpHeaders();
         // headers.set("Authorization", "Bearer " + BEARER_TOKEN);
         headers.setBearerAuth(BEARER_TOKEN);
-        headers.set("Cookie", "IMGURSESSION=8e3ccad0586ddb1bbe23ae652e2d076c; _nc=1");
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         // new UrlResource(url)
@@ -72,10 +71,10 @@ public class ImageService {
         // add the image to the user
         Image image = new Image(imgurApiResponse.getData().getId(), imgurApiResponse.getData().getLink(), user);
         saveOrUpdateImage(image);
-        return image;
+        return imgurApiResponse;
     }
     
-    public Image getImage(String id, User user) throws Exception {
+    public ImgurApiResponse getImage(String id, User user) throws Exception {
         if (id==null || id==" ") {
             throw new Exception("empty id");
         }
@@ -87,7 +86,7 @@ public class ImageService {
         }
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer b02b1a8164fd73cbe0c1189f236bd03794922b6e");
+        headers.set("Authorization", "Bearer "+BEARER_TOKEN);
 
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
         ResponseEntity<ImgurApiResponse> response = restTemplate.exchange(
@@ -104,7 +103,7 @@ public class ImageService {
         if (imgurApiResponse == null){
             throw new Exception("no image found");
         } 
-        return new Image(imgurApiResponse.getData().getId(), imgurApiResponse.getData().getLink(), user);
+        return imgurApiResponse;
     }
     
     public ResponseEntity<String> deleteImage(User user, String id) throws Exception {
@@ -117,8 +116,7 @@ public class ImageService {
         }
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth("b02b1a8164fd73cbe0c1189f236bd03794922b6e");
-        headers.set("Cookie", "IMGURSESSION=8195e3cfc0d8763ec2a1f194e691326d; _nc=1");
+        headers.setBearerAuth(BEARER_TOKEN);
 
         HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
 
